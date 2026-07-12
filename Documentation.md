@@ -19,7 +19,7 @@ graph TD
 
 ## 2. Database Schema (`supabase/migrations`)
 
-We created a database migration script [schema.sql](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/supabase/migrations/20260712000000_schema.sql) with the following structure:
+We created a database migration script [schema.sql](./supabase/migrations/20260712000000_schema.sql) with the following structure:
 - **`departments` table**: Tracks name, unique code, `head_id` (FK referencing employees), `parent_department_id` (self-referencing FK for organizational structure), and `employee_count`.
 - **`employees` table**: Tracks name, email, department, role (Employee, DepartmentHead, AssetManager, Admin), status (Active, Inactive), and `auth_user_id` (FK to Supabase `auth.users`).
 - **`asset_categories` table**: Tracks category name and custom field specifications as a JSONB array.
@@ -36,26 +36,26 @@ We created a database migration script [schema.sql](file:///d:/Projects/Hackthon
 ## 3. Node.js + Express + TypeScript Backend API (`backend/`)
 
 We implemented the backend server in TypeScript:
-- **Server Entrypoint**: [index.ts](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/backend/src/index.ts) manages port bindings, CORS, and registers public routes (`/api/me`) and administrative routes.
-- **Client wrappers**: [supabase.ts](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/backend/src/lib/supabase.ts) uses environmental variables to create standard and admin-level Supabase clients.
-- **Auth & RBAC Middleware**: [auth.middleware.ts](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/backend/src/middleware/auth.middleware.ts) retrieves the Bearer token, validates it against Supabase Auth (`supabase.auth.getUser()`), retrieves the employee rank using the admin client, checks for account deactivation, and enforces role clearance (e.g. `requireRole(['Admin'])`).
-- **Admin Endpoints**: [admin.controller.ts](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/backend/src/controllers/admin.controller.ts) & [admin.routes.ts](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/backend/src/routes/admin.routes.ts) handle promotions, department assignments, category setup, and status toggles.
+- **Server Entrypoint**: [index.ts](./backend/src/index.ts) manages port bindings, CORS, and registers public routes (`/api/me`) and administrative routes.
+- **Client wrappers**: [supabase.ts](./backend/src/lib/supabase.ts) uses environmental variables to create standard and admin-level Supabase clients.
+- **Auth & RBAC Middleware**: [auth.middleware.ts](./backend/src/middleware/auth.middleware.ts) retrieves the Bearer token, validates it against Supabase Auth (`supabase.auth.getUser()`), retrieves the employee rank using the admin client, checks for account deactivation, and enforces role clearance (e.g. `requireRole(['Admin'])`).
+- **Admin Endpoints**: [admin.controller.ts](./backend/src/controllers/admin.controller.ts) & [admin.routes.ts](./backend/src/routes/admin.routes.ts) handle promotions, department assignments, category setup, and status toggles.
 
 ---
 
 ## 4. React + Vite + TypeScript Frontend Client (`frontend/`)
 
 We constructed a dark-themed client application with:
-- **Routing & Sessions**: [App.tsx](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/frontend/src/App.tsx) handles redirection gates between public pages (Login, Signup, Recovery) and protected dashboards.
+- **Routing & Sessions**: [App.tsx](./frontend/src/App.tsx) handles redirection gates between public pages (Login, Signup, Recovery) and protected dashboards.
 - **Sign In & Registration**:
-  - [Login.tsx](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/frontend/src/pages/Login.tsx): Password visible/hidden toggle, login error notifications, and local state validation.
-  - [Signup.tsx](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/frontend/src/pages/Signup.tsx): Collects name metadata for profile creation, registering the user strictly as a standard `Employee`.
-  - [ForgotPassword.tsx](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/frontend/src/pages/ForgotPassword.tsx): Employs Supabase's built-in reset link engine.
-- **Org Setup Dashboard (Admin only)**: [OrgSetup.tsx](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/frontend/src/pages/OrgSetup.tsx) provides a 3-tab glassmorphic console:
+  - [Login.tsx](./frontend/src/pages/Login.tsx): Password visible/hidden toggle, login error notifications, and local state validation.
+  - [Signup.tsx](./frontend/src/pages/Signup.tsx): Collects name metadata for profile creation, registering the user strictly as a standard `Employee`.
+  - [ForgotPassword.tsx](./frontend/src/pages/ForgotPassword.tsx): Employs Supabase's built-in reset link engine.
+- **Org Setup Dashboard (Admin only)**: [OrgSetup.tsx](./frontend/src/pages/OrgSetup.tsx) provides a 3-tab glassmorphic console:
   - **Tab A — Departments**: Form with dropdowns for department heads/parents, active status toggles, and employee counts.
   - **Tab B — Asset Categories**: Schema builder to dynamically add/remove metadata fields (Warranty, Serial numbers).
   - **Tab C — Employee Registry**: Grid layout with text search, department filter, role filter, status filter, and management actions (promoting roles or changing departments).
-- **Employee Dashboard**: [EmployeeDashboard.tsx](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/frontend/src/pages/EmployeeDashboard.tsx) reads current profile statistics (assigned department, role rank, email) for standard users.
+- **Employee Dashboard**: [EmployeeDashboard.tsx](./frontend/src/pages/EmployeeDashboard.tsx) reads current profile statistics (assigned department, role rank, email) for standard users.
 
 ---
 
@@ -64,7 +64,7 @@ We constructed a dark-themed client application with:
 ### A. Database Setup (Supabase)
 1. Create a project on the [Supabase Dashboard](https://supabase.com/).
 2. Open the **SQL Editor** tab from the left sidebar.
-3. Paste the contents of [schema.sql](file:///d:/Projects/Hackthons/Odoo%20Hack/Bytecrushers/supabase/migrations/20260712000000_schema.sql) and click **Run**.
+3. Paste the contents of [schema.sql](./supabase/migrations/20260712000000_schema.sql) and click **Run**.
 
 ### B. Environment Configs
 1. **Backend**: Replace the placeholders in `backend/.env` with your Supabase credentials:

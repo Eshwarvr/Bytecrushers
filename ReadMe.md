@@ -1,6 +1,6 @@
 # AssetFlow — Project Roadmap & Backlog
 
-This file outlines the future milestones and **what to work on** next to expand AssetFlow into a complete enterprise ERP.
+This file outlines the updated future milestones and **what to work on** next to expand AssetFlow into a complete enterprise ERP, reflecting the official project phases.
 
 ---
 
@@ -11,46 +11,48 @@ gantt
   title AssetFlow ERP Project Timeline
   dateFormat  YYYY-MM-DD
   section Completed
-  Phase 1 : active, 2026-07-12, 1d
+  Phase 1 (Foundation) : done
   section Backlog (Next to Work On)
-  Phase 2 (Asset Registration) : 2026-07-13, 3d
-  Phase 3 (Allocations) : 2026-07-16, 3d
-  Phase 4 (Audits & Maintenance) : 2026-07-19, 4d
-  Phase 5 (Reporting & Analytics) : 2026-07-23, 2d
+  Phase 2 (Allocation & Booking Engine) : 
+  Phase 3 (Maintenance & Audit Workflows) : 
+  Phase 4 (Dashboard & Intelligence Layer) : 
 ```
 
 ---
 
 ## 🛠️ Backlog: What to Build Next
 
-### 1. Phase 2: Asset Registration & Category Schemes
-- [ ] **Database Setup**:
-  - Create an `assets` table: `id`, `name`, `serial_number`, `category_id` (FK referencing `asset_categories`), `status` (InStock, Allocated, Disposed, Maintenance), `purchase_date`, `purchase_cost`, `custom_attributes` (JSONB to store category-specific schema values).
-- [ ] **Asset Management UI**:
-  - Add screens for Asset Managers to register new assets.
-  - Dynamically generate form input fields based on the selected category's JSONB custom fields schema built in Phase 1 (e.g. if category is Laptop, show `warranty_period` and `ram_size`).
-- [ ] **Row-Level Security**:
-  - Restrict write operations on the `assets` table to Asset Managers and Admins only.
+For full specifications and step-by-step requirements of each phase, please refer to [Phases.md](./Phases.md).
 
-### 2. Phase 3: Allocations & Request Workflows
-- [ ] **Database Setup**:
-  - Create a `requests` table: request status tracking (Pending, Approved, Denied, Completed), employee details, requested category, and justification.
-  - Create an `allocations` table: asset reference, employee reference, allocation date, return due date, and current status (Active, Returned, Overdue).
-- [ ] **Employee Request Panel**:
-  - Allow standard Employees to request new assets based on category options.
-- [ ] **Approval Workflows**:
-  - Create dashboard tabs for Department Heads to approve or deny requests submitted by employees under their own department.
-- [ ] **Allocations Console**:
-  - Create a dashboard tab for Asset Managers to view approved requests and assign active assets to employees.
+### 1. [Phase 1: Foundation (Auth, RBAC & Org Setup)](./Phases.md#assetflow--phase-1-foundation-auth-rbac--org-setup) `[COMPLETED]`
+Laying the base for the entire application, including the database schema, authentication, role-based access control, and the administrator console.
+* **Tech Stack**: Supabase (Postgres & Auth), Express (Node.js/TS), React (Vite/TS), TailwindCSS, shadcn/ui.
+* **Key Components**:
+  - Database schema (`departments`, `employees`, `asset_categories`).
+  - Row-Level Security (RLS) policies and Express RBAC middleware.
+  - Three-tab Admin **Org Setup Screen** (Department Management, Asset Category Custom Fields Builder, Employee Directory & Promotion).
+* **Reference**: See [Documentation.md](./Documentation.md) for technical implementation details of Phase 1.
 
-### 3. Phase 4: Maintenance Lifecycles & Audit Reports
-- [ ] **Maintenance Tracking**:
-  - Maintain logs for repair history, costs, and current maintenance status of assets.
-- [ ] **Annual Auditing Tools**:
-  - Create physical validation reports and verify active asset statuses.
+### 2. [Phase 2: Allocation & Booking Engine](./Phases.md#assetflow--phase-2-allocation--booking-engine)
+Implementing the core business logic, conflicts engine, transfer workflows, and calendar-based bookings.
+* **Tech Stack**: React, TailwindCSS, Express, Supabase, React Query, `qrcode.react`, Calendar component (e.g. `react-big-calendar`).
+* **Key Components**:
+  - **Asset Registry**: CRUD forms, incremental Asset Tags, barcode/QR generation, search/filter, and history views.
+  - **Allocation & Transfer Engine**: Double-booking conflict blocking with active holder lookups and department-head transfer approval flow.
+  - **Resource Booking**: Visual calendar showing availability, overlap validation logic (with back-to-back allowance), and reschedule options.
 
-### 4. Phase 5: Reporting & Analytics Dashboards
-- [ ] Add visual charts displaying:
-  - Total asset value per department.
-  - Distribution of asset conditions.
-  - Total depreciation schedules and maintenance costs over time.
+### 3. [Phase 3: Maintenance & Audit Workflows](./Phases.md#assetflow--phase-3-maintenance--audit-workflows)
+Building two multi-step approval-gated state machines for asset maintenance logs and periodic structured audits.
+* **Tech Stack**: React, TailwindCSS, Express, Supabase (with Storage for photo attachments).
+* **Key Components**:
+  - **Maintenance Lifecycle**: Request submission with image attachments, Asset Manager approval gates, technician assignment, and automatic status cascading (`Available` ⟷ `Under Maintenance`).
+  - **Asset Audits**: Scheduled cycle creator, scope assignments, auditor checklist panel, auto-generated discrepancy reports, and automated status cascading to `Lost` for missing items.
+
+### 4. [Phase 4: Dashboard, Notifications & Intelligence Layer](./Phases.md#assetflow--phase-4-dashboard-notifications--intelligence-layer)
+Connecting all components with real-time feedback, statistics/reporting dashboard, unified activity logging, and AI intelligence features.
+* **Tech Stack**: React, TailwindCSS, Express, Socket.io (for real-time push), Recharts, Gemini API (for summaries/risk assessment).
+* **Key Components**:
+  - **Live Dashboard**: Real-time KPI count card updates (Socket.io) for stock, active bookings, and overdue return warnings.
+  - **Notification Center**: Bell dropdown with unread count and real-time push alerts for assignments, approvals, and discrepancies.
+  - **Reports & Analytics**: Trend charts (utilization, maintenance frequency, retirement schedules), peak usage heatmaps, and CSV/PDF export.
+  - **AI Intelligence**: Gemini API risk score explanations per asset, and automated plain-English summary narratives for audit discrepancy reports (with rule-based fallbacks).
