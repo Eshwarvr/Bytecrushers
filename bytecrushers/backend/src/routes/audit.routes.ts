@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import { listCycles, createCycle, listItems, addAuditItem, closeCycle } from '../controllers/audit.controller';
+import { requireAuth } from '../middleware/auth.middleware';
+const router = Router();
+router.get('/', requireAuth, listCycles);
+router.post('/', requireAuth, createCycle);
+router.get('/items', requireAuth, listItems);
+router.get('/:cycleId/items', requireAuth, listItems);
+router.post('/items', requireAuth, addAuditItem);
+router.post('/:id/close', requireAuth, closeCycle);
+export default router;

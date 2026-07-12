@@ -7,6 +7,11 @@ import assetRoutes from './routes/asset.routes';
 import allocationRoutes from './routes/allocation.routes';
 import transferRoutes from './routes/transfer.routes';
 import bookingRoutes from './routes/booking.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import activityRoutes from './routes/activity.routes';
+import notificationRoutes from './routes/notification.routes';
+import maintenanceRoutes from './routes/maintenance.routes';
+import auditRoutes from './routes/audit.routes';
 import { requireAuth } from './middleware/auth.middleware';
 
 dotenv.config();
@@ -42,6 +47,13 @@ app.use('/api/assets', assetRoutes);
 app.use('/api/allocations', allocationRoutes);
 app.use('/api/transfers', transferRoutes);
 app.use('/api/bookings', bookingRoutes);
+
+// Phase 3 & 4 New Routes
+app.use('/api/dashboard-kpis', dashboardRoutes);
+app.use('/api/activity-logs', activityRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/audit', auditRoutes);
 // Serve Frontend Static Files (Vite Production Build)
 const distPath = path.resolve(process.cwd(), 'frontend/dist');
 app.use(express.static(distPath));
