@@ -138,8 +138,8 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="mt-8 text-center text-xs text-muted-foreground font-inter">
-          Contact your organization's IT department to request credentials.
+        <div className="mt-8 text-center text-sm text-muted-foreground font-inter">
+          Don't have an account? <Link to="/signup" className="text-purple-400 hover:text-purple-300 transition-colors font-semibold">Sign up here</Link>
         </div>
       </div>
     </div>
