@@ -42,7 +42,8 @@ export default function AuditorView() {
         .eq('audit_cycles.status', 'open');
         
       if (cycleData && cycleData.length > 0) {
-        const cycle = cycleData[0].audit_cycles;
+        const rawCycle = cycleData[0].audit_cycles;
+        const cycle = Array.isArray(rawCycle) ? rawCycle[0] : rawCycle;
         setActiveCycle(cycle);
         
         // Fetch items for this cycle

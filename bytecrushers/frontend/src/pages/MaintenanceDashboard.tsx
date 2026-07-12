@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Loader2, Wrench, Plus, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { Loader2, Wrench, Plus, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function MaintenanceDashboard() {

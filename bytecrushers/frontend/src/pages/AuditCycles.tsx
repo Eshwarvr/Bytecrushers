@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 
 export default function AuditCycles() {
   const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string>('Employee');
   const [currentUser, setCurrentUser] = useState<any>(null);
   
   const [cycles, setCycles] = useState<any[]>([]);
@@ -38,7 +37,6 @@ export default function AuditCycles() {
       if (profileError) throw profileError;
       
       setCurrentUser(profileData);
-      setUserRole(profileData.role);
       
       if (profileData.role !== 'Admin') {
         navigate('/dashboard');

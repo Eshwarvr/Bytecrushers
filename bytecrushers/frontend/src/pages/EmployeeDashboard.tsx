@@ -20,14 +20,7 @@ export default function EmployeeDashboard() {
       const res = await api.get('/api/me');
       setCurrentUser(res.data);
       
-<<<<<<< HEAD
-      // If Admin lands here, redirect to Admin control center automatically
-      if (res.data.employee.role === 'Admin') {
-        navigate('/org-setup');
-      }
-=======
       // Remove automatic Admin redirect so they can access Audit modules from the dashboard
->>>>>>> origin/Phase-3
     } catch (err: any) {
       console.error('Error loading employee profile:', err);
       setError('Session expired or profile loading failed.');
@@ -119,7 +112,6 @@ export default function EmployeeDashboard() {
             </div>
           </div>
 
-<<<<<<< HEAD
           {/* QUICK LINKS FOR PHASE 2 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <button onClick={() => navigate('/assets')} className="p-4 bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/20 rounded-xl flex items-center justify-between transition-all cursor-pointer">
@@ -138,11 +130,6 @@ export default function EmployeeDashboard() {
             </button>
           </div>
 
-          <div className="border-t border-white/5 pt-6 text-center">
-            <p className="text-sm text-slate-400 leading-relaxed max-w-xl mx-auto">
-              Welcome to the AssetFlow employee dashboard! As a <strong>{employee?.role}</strong>, you have access to read your personal assets and department directories. The administrative <strong>Organization Setup Hub</strong> is currently restricted to your profile.
-            </p>
-=======
           <div className="border-t border-white/5 pt-6 mt-6 flex flex-col items-center gap-4">
             <p className="text-sm text-slate-400 leading-relaxed max-w-xl mx-auto text-center mb-2">
               Welcome to the AssetFlow employee dashboard! Quick actions available for your role:
@@ -168,7 +155,6 @@ export default function EmployeeDashboard() {
                 Auditor View
               </button>
             </div>
->>>>>>> origin/Phase-3
           </div>
         </div>
       </main>
