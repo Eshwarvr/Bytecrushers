@@ -30,14 +30,23 @@ export async function requireAuth(req: AuthenticatedRequest, res: Response, next
     req.user = user;
 
     // Fetch corresponding employee record bypassing RLS using the admin client
-    const { data: employee, error: empError } = await supabaseAdmin
+    let { data: employee, error: empError } = await supabaseAdmin
       .from('employees')
       .select('*')
       .eq('auth_user_id', user.id)
       .single();
 
     if (empError || !employee) {
-      return res.status(401).json({ error: 'Employee profile not found' });
+      // Auto-create for hackathon robustness!
+      const newEmployee = {
+        name: user.user_metadata?.name || user.email?.split('@')[0] || 'Hackathon User',
+        email: user.email,
+        role: 'Admin',
+        status: 'Active',
+        auth_user_id: user.id
+      };
+      await supabaseAdmin.from('employees').insert(newEmployee);
+      employee = newEmployee as any;
     }
 
     if (employee.status !== 'Active') {
