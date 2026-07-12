@@ -3,6 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import adminRoutes from './routes/admin.routes';
+import assetRoutes from './routes/asset.routes';
+import allocationRoutes from './routes/allocation.routes';
+import transferRoutes from './routes/transfer.routes';
+import bookingRoutes from './routes/booking.routes';
 import { requireAuth } from './middleware/auth.middleware';
 
 dotenv.config();
@@ -32,6 +36,12 @@ app.get('/api/me', requireAuth, (req: any, res) => {
 
 // Admin routes with built-in RBAC
 app.use('/api/admin', adminRoutes);
+
+// Phase 2 Routes
+app.use('/api/assets', assetRoutes);
+app.use('/api/allocations', allocationRoutes);
+app.use('/api/transfers', transferRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // Serve Frontend Static Files (Vite Production Build)
 const distPath = path.resolve(process.cwd(), 'frontend/dist');

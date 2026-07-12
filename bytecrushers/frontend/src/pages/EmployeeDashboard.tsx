@@ -115,6 +115,24 @@ export default function EmployeeDashboard() {
             </div>
           </div>
 
+          {/* QUICK LINKS FOR PHASE 2 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <button onClick={() => navigate('/assets')} className="p-4 bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/20 rounded-xl flex items-center justify-between transition-all cursor-pointer">
+              <div className="flex flex-col text-left">
+                <span className="text-white font-bold font-outfit">Asset Registry</span>
+                <span className="text-xs text-purple-400">View and manage company assets</span>
+              </div>
+              <Building className="w-5 h-5 text-purple-400" />
+            </button>
+            <button onClick={() => navigate('/workflows')} className="p-4 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 rounded-xl flex items-center justify-between transition-all cursor-pointer">
+              <div className="flex flex-col text-left">
+                <span className="text-white font-bold font-outfit">Resource Engine</span>
+                <span className="text-xs text-indigo-400">Allocations, Bookings & Transfers</span>
+              </div>
+              <ShieldCheck className="w-5 h-5 text-indigo-400" />
+            </button>
+          </div>
+
           <div className="border-t border-white/5 pt-6 text-center">
             <p className="text-sm text-slate-400 leading-relaxed max-w-xl mx-auto">
               Welcome to the AssetFlow employee dashboard! As a <strong>{employee?.role}</strong>, you have access to read your personal assets and department directories. The administrative <strong>Organization Setup Hub</strong> is currently restricted to your profile.
