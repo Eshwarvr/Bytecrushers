@@ -66,54 +66,26 @@ export async function fetchAuditItems(): Promise<AuditItem[]> {
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function fetchNotifications(): Promise<Notification[]> {
-  // TODO: swap to real backend endpoint once Phase 2/3 exposes /api/notifications
-  await delay(500);
-  return generateNotifications();
+  const res = await api.get('/api/notifications');
+  return res.data;
 }
 
 export async function fetchActivityLogs(filters?: { category?: string; dateRange?: { from: Date; to: Date } }): Promise<ActivityLog[]> {
-  // TODO: swap to real backend endpoint once Phase 2/3 exposes /api/activity-logs
-  await delay(600);
-  let logs = generateActivityLogs();
-  
+  let url = '/api/activity-logs';
   if (filters?.category && filters.category !== 'All') {
-    logs = logs.filter(log => log.category === filters.category);
+    url += \`?category=\${filters.category}\`;
   }
-  return logs;
+  const res = await api.get(url);
+  return res.data;
 }
 
 export async function fetchDashboardKPIs() {
-  // TODO: swap to real backend endpoint once Phase 2/3 exposes /api/dashboard-kpis
-  await delay(700);
-  const assets = generateAssets();
-  const allocations = generateAllocations();
-  const maintenance = generateMaintenanceRequests();
-  const bookings = generateBookings();
-
-  const available = assets.filter(a => a.status === 'Available').length;
-  const allocated = assets.filter(a => a.status === 'Allocated').length;
-  const inMaintenance = maintenance.filter(m => m.status === 'InProgress').length;
-  const activeBookings = bookings.filter(b => b.status === 'Ongoing').length;
-  
-  // TODO: replace with real count from /api/transfers?status=Requested once Phase 2 exposes it
-  const pendingTransfers = 0;
-  
-  const upcomingReturns = allocations.filter(a => a.status === 'Active' && a.expectedReturnDate != null).length;
-
-  return {
-    available,
-    allocated,
-    inMaintenance,
-    activeBookings,
-    pendingTransfers,
-    upcomingReturns
-  };
+  const res = await api.get('/api/dashboard-kpis');
+  return res.data;
 }
 
 export async function markNotificationRead(id: string): Promise<void> {
-  // TODO: swap to real backend endpoint once Phase 2/3 exposes /api/notifications/:id/read
-  await delay(300);
-  console.log(`Notification ${id} marked as read`);
+  await api.post(\`/api/notifications/\${id}/read\`);
 }
 
 export default api;

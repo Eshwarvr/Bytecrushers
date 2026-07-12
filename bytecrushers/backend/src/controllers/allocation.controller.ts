@@ -1,101 +1,120 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { supabaseAdmin } from '../lib/supabase';
+import { logActivity, createNotification } from '../lib/activity.service';
 
-// 2. Allocation Engine
 export async function createAllocation(req: AuthenticatedRequest, res: Response) {
-  const { asset_id, employee_id } = req.body;
+  const { asset_id, employee_id, expected_return_date } = req.body;
   if (!asset_id || !employee_id) {
     return res.status(400).json({ error: 'asset_id and employee_id are required' });
   }
 
   try {
-    // Check if asset is available
     const { data: asset, error: assetError } = await supabaseAdmin
       .from('assets')
-      .select('status')
+      .select('status, name')
       .eq('id', asset_id)
       .single();
 
     if (assetError) throw assetError;
-    if (asset?.status !== 'available') {
+    
+    // Check if asset is already allocated
+    if (asset?.status === 'Allocated') {
+      const { data: currentAlloc } = await supabaseAdmin
+        .from('allocations')
+        .select('held_by_id, employees:held_by_id(name)')
+        .eq('asset_id', asset_id)
+        .eq('status', 'Active')
+        .single();
+      
+      const heldByName = currentAlloc?.employees?.[0]?.name || 'Unknown';
+      return res.status(409).json({ 
+        error: \`Asset is currently held by \${heldByName}. Please submit a Transfer Request instead.\`,
+        actionRequired: 'TRANSFER_REQUEST'
+      });
+    }
+    
+    if (asset?.status !== 'Available') {
       return res.status(400).json({ error: 'Asset is not available for allocation' });
     }
 
-    // Use transaction-like behavior: insert allocation, update asset
     const { data: allocation, error: allocError } = await supabaseAdmin
       .from('allocations')
-      .insert([{ asset_id, employee_id }])
+      .insert([{ 
+        asset_id, 
+        held_by_type: 'employee', 
+        held_by_id: employee_id,
+        expected_return_date: expected_return_date || null
+      }])
       .select()
       .single();
     if (allocError) throw allocError;
 
     const { error: updateError } = await supabaseAdmin
       .from('assets')
-      .update({ status: 'allocated' })
+      .update({ status: 'Allocated' })
       .eq('id', asset_id);
     if (updateError) throw updateError;
 
+    await createNotification({ type: 'ASSET_ASSIGNED', title: 'Asset Assigned', message: \`You have been allocated \${asset.name}\`, entityType: 'Asset', entityId: asset_id, userId: employee_id });
+    await logActivity({ actor: req.employee?.name || 'System', actorId: req.employee?.id!, action: 'Allocated Asset', entityType: 'Asset', entityId: asset_id, entityName: asset.name, category: 'Approvals' });
+
     return res.status(201).json(allocation);
   } catch (error: any) {
-    console.error('Create allocation error:', error);
-    return res.status(500).json({ error: error.message || 'Failed to create allocation' });
+    return res.status(500).json({ error: error.message });
   }
 }
 
 export async function returnAllocation(req: AuthenticatedRequest, res: Response) {
   const { id } = req.params;
-  const { asset_condition } = req.body; // Phase 3 placeholder, not strictly needed but good
+  const { asset_condition } = req.body;
 
   try {
     const { data: allocation, error: allocCheckError } = await supabaseAdmin
       .from('allocations')
-      .select('asset_id, returned_at')
+      .select('asset_id, returned_date, assets(name)')
       .eq('id', id)
       .single();
 
     if (allocCheckError) throw allocCheckError;
-    if (allocation.returned_at) {
+    if (allocation.returned_date) {
       return res.status(400).json({ error: 'Allocation is already returned' });
     }
 
-    const { error: allocUpdateError } = await supabaseAdmin
+    await supabaseAdmin
       .from('allocations')
-      .update({ returned_at: new Date().toISOString() })
+      .update({ returned_date: new Date().toISOString(), status: 'Returned' })
       .eq('id', id);
-    if (allocUpdateError) throw allocUpdateError;
 
-    const { error: assetUpdateError } = await supabaseAdmin
+    await supabaseAdmin
       .from('assets')
-      .update({ status: 'available' })
+      .update({ status: 'Available', condition: asset_condition || 'Good' })
       .eq('id', allocation.asset_id);
-    if (assetUpdateError) throw assetUpdateError;
+      
+    await logActivity({ actor: req.employee?.name || 'System', actorId: req.employee?.id!, action: 'Returned Asset', entityType: 'Asset', entityId: allocation.asset_id, entityName: allocation.assets?.[0]?.name || 'Asset', category: 'Approvals' });
 
     return res.status(200).json({ message: 'Asset returned successfully' });
   } catch (error: any) {
-    console.error('Return allocation error:', error);
-    return res.status(500).json({ error: error.message || 'Failed to return allocation' });
+    return res.status(500).json({ error: error.message });
   }
 }
 
 export async function listAllocations(req: AuthenticatedRequest, res: Response) {
   try {
-    // If not Admin/AssetManager, only show own allocations
-    let query = supabaseAdmin.from('allocations').select(`
+    let query = supabaseAdmin.from('allocations').select(\`
       *,
       asset:assets(*),
       employee:employees(*)
-    `);
+    \`);
 
     if (req.employee?.role !== 'Admin' && req.employee?.role !== 'AssetManager') {
-      query = query.eq('employee_id', req.employee?.id);
+      query = query.eq('held_by_id', req.employee?.id);
     }
 
     const { data: allocations, error } = await query;
     if (error) throw error;
     return res.status(200).json(allocations);
   } catch (error: any) {
-    console.error('List allocations error:', error);
-    return res.status(500).json({ error: error.message || 'Failed to list allocations' });
+    return res.status(500).json({ error: error.message });
   }
 }

@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { supabaseAdmin } from '../lib/supabase';
+import { logActivity, createNotification } from '../lib/activity.service';
 
 export async function createBooking(req: AuthenticatedRequest, res: Response) {
   const { asset_id, start_time, end_time } = req.body;
@@ -29,6 +30,8 @@ export async function createBooking(req: AuthenticatedRequest, res: Response) {
       return res.status(400).json({ error: 'Booking time overlaps with an existing booking' });
     }
 
+    const { data: asset } = await supabaseAdmin.from('assets').select('name').eq('id', asset_id).single();
+
     const { data: booking, error: insertError } = await supabaseAdmin
       .from('bookings')
       .insert([{
@@ -41,10 +44,13 @@ export async function createBooking(req: AuthenticatedRequest, res: Response) {
       .single();
 
     if (insertError) throw insertError;
+    
+    await logActivity({ actor: req.employee?.name || 'System', actorId: req.employee?.id!, action: 'Booked Resource', entityType: 'Booking', entityId: booking.id, entityName: asset?.name || 'Resource', category: 'Bookings' });
+    await createNotification({ type: 'BOOKING_CONFIRMED', title: 'Booking Confirmed', message: \`Your booking for \${asset?.name} is confirmed\`, entityType: 'Booking', entityId: booking.id, userId: req.employee?.id });
+
     return res.status(201).json(booking);
   } catch (error: any) {
-    console.error('Create booking error:', error);
-    return res.status(500).json({ error: error.message || 'Failed to create booking' });
+    return res.status(500).json({ error: error.message });
   }
 }
 
