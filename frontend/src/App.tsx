@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabaseClient';
 import Login from './pages/Login';
-import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import OrgSetup from './pages/OrgSetup';
 import EmployeeDashboard from './pages/EmployeeDashboard';
@@ -44,7 +43,6 @@ export default function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={!session ? <Login /> : <Navigate to="/" replace />} />
-        <Route path="/signup" element={!session ? <Signup /> : <Navigate to="/" replace />} />
         <Route path="/forgot-password" element={!session ? <ForgotPassword /> : <Navigate to="/" replace />} />
 
         {/* Protected Routes */}

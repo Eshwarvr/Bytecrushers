@@ -99,6 +99,13 @@ export default function OrgSetup() {
   const [empDeptId, setEmpDeptId] = useState<string>('');
   const [empStatus, setEmpStatus] = useState<'Active' | 'Inactive'>('Active');
 
+  // Employee creation state
+  const [isEmpCreateModalOpen, setIsEmpCreateModalOpen] = useState(false);
+  const [newEmpName, setNewEmpName] = useState('');
+  const [newEmpEmail, setNewEmpEmail] = useState('');
+  const [newEmpRole, setNewEmpRole] = useState<'Employee' | 'DepartmentHead' | 'AssetManager' | 'Admin'>('Employee');
+  const [newEmpDeptId, setNewEmpDeptId] = useState('');
+
   useEffect(() => {
     fetchProfileAndData();
   }, []);
@@ -314,6 +321,38 @@ export default function OrgSetup() {
       fetchProfileAndData();
     } catch (err: any) {
       showNotification(err.response?.data?.error || 'Employee update failed', 'error');
+    }
+  };
+
+  const openNewEmpCreateModal = () => {
+    setNewEmpName('');
+    setNewEmpEmail('');
+    setNewEmpRole('Employee');
+    setNewEmpDeptId('');
+    setIsEmpCreateModalOpen(true);
+  };
+
+  const handleNewEmpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmpName || !newEmpEmail) {
+      showNotification('Name and Email are required.', 'error');
+      return;
+    }
+
+    try {
+      const payload = {
+        name: newEmpName,
+        email: newEmpEmail,
+        role: newEmpRole,
+        department_id: newEmpDeptId || null
+      };
+
+      await api.post('/api/admin/employees', payload);
+      showNotification('Employee created successfully! Temporary password is: TemporaryPassword123!', 'success');
+      setIsEmpCreateModalOpen(false);
+      fetchProfileAndData();
+    } catch (err: any) {
+      showNotification(err.response?.data?.error || 'Failed to create employee', 'error');
     }
   };
 
@@ -615,6 +654,12 @@ export default function OrgSetup() {
                   <h3 className="text-lg font-bold font-outfit text-white">Employee Registry</h3>
                   <p className="text-xs text-muted-foreground">List staff and promote users to managerial roles</p>
                 </div>
+                <button
+                  onClick={openNewEmpCreateModal}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-purple-600/20 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Create Employee
+                </button>
               </div>
 
               {/* SEARCH & FILTERS ROW */}
@@ -1053,6 +1098,102 @@ export default function OrgSetup() {
                   className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-purple-600 hover:bg-purple-500 shadow-md shadow-purple-600/15 cursor-pointer"
                 >
                   Apply Settings
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 4. EMPLOYEE CREATION MODAL */}
+      {isEmpCreateModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg glass-card rounded-2xl relative overflow-hidden font-inter">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+            <div className="p-6 border-b border-white/5 flex justify-between items-center">
+              <h3 className="text-xl font-bold font-outfit text-white">Create New Employee</h3>
+              <button 
+                onClick={() => setIsEmpCreateModalOpen(false)}
+                className="p-1.5 text-muted-foreground hover:text-white bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleNewEmpSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Employee Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. John Doe"
+                  value={newEmpName}
+                  onChange={(e) => setNewEmpName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl glass-input text-sm"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Email Address</label>
+                <input
+                  type="email"
+                  placeholder="e.g. john@company.com"
+                  value={newEmpEmail}
+                  onChange={(e) => setNewEmpEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl glass-input text-sm"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  Role Rank
+                </label>
+                <select
+                  value={newEmpRole}
+                  onChange={(e) => setNewEmpRole(e.target.value as any)}
+                  className="w-full px-4 py-2.5 rounded-xl glass-input text-sm appearance-none cursor-pointer"
+                >
+                  <option value="Employee">Employee (Base Access)</option>
+                  <option value="DepartmentHead">Department Head (Manager)</option>
+                  <option value="AssetManager">Asset Manager (Procurements)</option>
+                  <option value="Admin">System Administrator</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Department Assignment</label>
+                <select
+                  value={newEmpDeptId}
+                  onChange={(e) => setNewEmpDeptId(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl glass-input text-sm appearance-none cursor-pointer"
+                >
+                  <option value="">No Department Assigned</option>
+                  {departments
+                    .filter(d => d.status === 'Active')
+                    .map(d => (
+                      <option key={d.id} value={d.id}>{d.name} ({d.code})</option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="p-3 bg-purple-500/10 border border-purple-500/20 text-purple-300 rounded-xl text-xs leading-relaxed">
+                🚀 A new user login account will be provisioned. The initial temporary password is: <strong>TemporaryPassword123!</strong>
+              </div>
+
+              <div className="pt-4 flex justify-end gap-3 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setIsEmpCreateModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-purple-600 hover:bg-purple-500 shadow-md shadow-purple-600/15 cursor-pointer"
+                >
+                  Provision Account
                 </button>
               </div>
             </form>

@@ -10,6 +10,7 @@ router.use(requireRole(['Admin']));
 
 // Employee Directory & Promotion
 router.get('/employees', adminController.listEmployees);
+router.post('/employees', adminController.createEmployee);
 router.put('/employees/:id', adminController.updateEmployee);
 
 // Department Management

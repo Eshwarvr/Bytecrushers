@@ -26,12 +26,30 @@ export default function Login() {
         password,
       });
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        console.error('Supabase signInWithPassword error:', signInError);
+        throw signInError;
+      }
       
       // Successfully logged in
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in. Please verify your credentials.');
+      console.error('Caught sign-in error:', err);
+      let errorMsg = 'Failed to sign in. Please verify your credentials.';
+      if (err) {
+        if (typeof err === 'string') {
+          errorMsg = err;
+        } else if (err.message && err.message !== '{}') {
+          errorMsg = err.message;
+        } else if (err.error_description) {
+          errorMsg = err.error_description;
+        } else if (err.error) {
+          errorMsg = typeof err.error === 'string' ? err.error : (err.error.message || JSON.stringify(err.error));
+        } else {
+          errorMsg = JSON.stringify(err);
+        }
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -120,11 +138,8 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="mt-8 text-center text-sm text-muted-foreground font-inter">
-          Don't have an account?{' '}
-          <Link to="/signup" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
-            Sign up now
-          </Link>
+        <div className="mt-8 text-center text-xs text-muted-foreground font-inter">
+          Contact your organization's IT department to request credentials.
         </div>
       </div>
     </div>

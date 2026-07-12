@@ -3,13 +3,50 @@ import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { supabaseAdmin } from '../lib/supabase';
 
 // 1. Employee Directory and Promotion
+export async function createEmployee(req: AuthenticatedRequest, res: Response) {
+  const { name, email, role, department_id } = req.body;
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Name and Email are required' });
+  }
+
+  try {
+    // Provision credentials via Supabase Admin Authentication SDK
+    const { data, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: 'TemporaryPassword123!',
+      email_confirm: true,
+      user_metadata: { name }
+    });
+
+    if (createError) throw createError;
+
+    // The trigger handle_new_user() automatically created the employee record.
+    // We now customize their rank (role) and department from the admin parameters.
+    const { data: updatedEmployee, error: updateError } = await supabaseAdmin
+      .from('employees')
+      .update({ 
+        role: role || 'Employee',
+        department_id: department_id || null
+      })
+      .eq('auth_user_id', data.user.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+    return res.status(201).json(updatedEmployee);
+  } catch (error: any) {
+    console.error('Create employee error:', error);
+    return res.status(500).json({ error: error.message || 'Failed to create employee' });
+  }
+}
+
 export async function listEmployees(req: AuthenticatedRequest, res: Response) {
   try {
     const { data: employees, error } = await supabaseAdmin
       .from('employees')
       .select(`
         *,
-        department:departments(id, name)
+        department:departments!department_id(id, name)
       `);
 
     if (error) throw error;
@@ -57,7 +94,7 @@ export async function listDepartments(req: AuthenticatedRequest, res: Response) 
       .from('departments')
       .select(`
         *,
-        head:employees(id, name)
+        head:employees!head_id(id, name)
       `);
 
     if (error) throw error;
