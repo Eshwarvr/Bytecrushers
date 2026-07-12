@@ -5,6 +5,9 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import OrgSetup from './pages/OrgSetup';
 import EmployeeDashboard from './pages/EmployeeDashboard';
+import MaintenanceDashboard from './pages/MaintenanceDashboard';
+import AuditCycles from './pages/AuditCycles';
+import AuditorView from './pages/AuditorView';
 import { Loader2 } from 'lucide-react';
 
 export default function App() {
@@ -48,6 +51,9 @@ export default function App() {
         {/* Protected Routes */}
         <Route path="/org-setup" element={session ? <OrgSetup /> : <Navigate to="/login" replace />} />
         <Route path="/dashboard" element={session ? <EmployeeDashboard /> : <Navigate to="/login" replace />} />
+        <Route path="/maintenance" element={session ? <MaintenanceDashboard /> : <Navigate to="/login" replace />} />
+        <Route path="/audit-cycles" element={session ? <AuditCycles /> : <Navigate to="/login" replace />} />
+        <Route path="/auditor" element={session ? <AuditorView /> : <Navigate to="/login" replace />} />
 
         {/* Home Routing Portal */}
         <Route path="/" element={session ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
