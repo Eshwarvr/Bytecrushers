@@ -1,3 +1,22 @@
+# Dependency directories
+node_modules/
+node_modules
+
+# Compiled files and builds
+dist/
+dist
+dist-ssr
+build/
+*.tsbuildinfo
+
+# Env configs (security sensitive credentials)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+
 # Logs
 logs
 *.log
@@ -7,16 +26,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# IDE/System configuration files
+.vscode/
 .vscode/*
 !.vscode/extensions.json
+.idea/
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
