@@ -27,16 +27,18 @@ export async function updateStatus(req: AuthenticatedRequest, res: Response) {
     const { data: reqData } = await supabaseAdmin.from('maintenance_requests').select('asset_id, raised_by').eq('id', req.params.id).single();
     
     // Auto-Cascade Asset Status
-    if (status === 'Approved' || status === 'InProgress' || status === 'TechnicianAssigned') {
+    if (reqData && (status === 'Approved' || status === 'InProgress' || status === 'TechnicianAssigned')) {
       await supabaseAdmin.from('assets').update({ status: 'UnderMaintenance' }).eq('id', reqData.asset_id);
-    } else if (status === 'Resolved' || status === 'Rejected') {
+    } else if (reqData && (status === 'Resolved' || status === 'Rejected')) {
       await supabaseAdmin.from('assets').update({ status: 'Available' }).eq('id', reqData.asset_id);
     }
 
     const { data, error } = await supabaseAdmin.from('maintenance_requests').update({ status }).eq('id', req.params.id).select().single();
     if (error) throw error;
 
-    await createNotification({ type: 'MAINTENANCE_UPDATE', title: 'Maintenance ' + status, message: 'Maintenance status updated to ' + status, entityType: 'Maintenance', entityId: data.id, userId: reqData.raised_by });
+    if (reqData?.raised_by) {
+      await createNotification({ type: 'MAINTENANCE_UPDATE', title: 'Maintenance ' + status, message: 'Maintenance status updated to ' + status, entityType: 'Maintenance', entityId: data.id, userId: reqData.raised_by });
+    }
     await logActivity({ actor: req.employee?.name || 'System', actorId: req.employee?.id!, action: 'Updated Maintenance to ' + status, entityType: 'Maintenance', entityId: data.id, entityName: 'Maintenance Request', category: 'Approvals' });
     
     res.json(data);

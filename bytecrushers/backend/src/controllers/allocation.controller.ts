@@ -29,7 +29,7 @@ export async function createAllocation(req: AuthenticatedRequest, res: Response)
       
       const heldByName = currentAlloc?.employees?.[0]?.name || 'Unknown';
       return res.status(409).json({ 
-        error: \`Asset is currently held by \${heldByName}. Please submit a Transfer Request instead.\`,
+        error: `Asset is currently held by ${heldByName}. Please submit a Transfer Request instead.`,
         actionRequired: 'TRANSFER_REQUEST'
       });
     }
@@ -56,7 +56,7 @@ export async function createAllocation(req: AuthenticatedRequest, res: Response)
       .eq('id', asset_id);
     if (updateError) throw updateError;
 
-    await createNotification({ type: 'ASSET_ASSIGNED', title: 'Asset Assigned', message: \`You have been allocated \${asset.name}\`, entityType: 'Asset', entityId: asset_id, userId: employee_id });
+    await createNotification({ type: 'ASSET_ASSIGNED', title: 'Asset Assigned', message: `You have been allocated ${asset.name}`, entityType: 'Asset', entityId: asset_id, userId: employee_id });
     await logActivity({ actor: req.employee?.name || 'System', actorId: req.employee?.id!, action: 'Allocated Asset', entityType: 'Asset', entityId: asset_id, entityName: asset.name, category: 'Approvals' });
 
     return res.status(201).json(allocation);
@@ -101,11 +101,11 @@ export async function returnAllocation(req: AuthenticatedRequest, res: Response)
 
 export async function listAllocations(req: AuthenticatedRequest, res: Response) {
   try {
-    let query = supabaseAdmin.from('allocations').select(\`
+    let query = supabaseAdmin.from('allocations').select(`
       *,
       asset:assets(*),
       employee:employees(*)
-    \`);
+    `);
 
     if (req.employee?.role !== 'Admin' && req.employee?.role !== 'AssetManager') {
       query = query.eq('held_by_id', req.employee?.id);

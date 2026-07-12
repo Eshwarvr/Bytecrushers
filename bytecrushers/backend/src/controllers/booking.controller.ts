@@ -46,7 +46,7 @@ export async function createBooking(req: AuthenticatedRequest, res: Response) {
     if (insertError) throw insertError;
     
     await logActivity({ actor: req.employee?.name || 'System', actorId: req.employee?.id!, action: 'Booked Resource', entityType: 'Booking', entityId: booking.id, entityName: asset?.name || 'Resource', category: 'Bookings' });
-    await createNotification({ type: 'BOOKING_CONFIRMED', title: 'Booking Confirmed', message: \`Your booking for \${asset?.name} is confirmed\`, entityType: 'Booking', entityId: booking.id, userId: req.employee?.id });
+    await createNotification({ type: 'BOOKING_CONFIRMED', title: 'Booking Confirmed', message: `Your booking for ${asset?.name} is confirmed`, entityType: 'Booking', entityId: booking.id, userId: req.employee?.id });
 
     return res.status(201).json(booking);
   } catch (error: any) {
