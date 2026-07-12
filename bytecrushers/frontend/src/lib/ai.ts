@@ -52,7 +52,7 @@ Condition: ${asset.condition}
 Calculated Risk Score: ${riskScore}/100`;
 
   try {
-    const apiCall = fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const apiCall = fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -88,7 +88,7 @@ Discrepancies:
 ${auditItems.map(i => `- ${i.assetName}: ${i.verificationStatus} (${i.notes})`).join('\n')}`;
 
   try {
-    const apiCall = fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const apiCall = fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
