@@ -18,7 +18,6 @@ const navItems = [
   { title: 'Audit', url: '/audit', icon: ClipboardCheck },
   { title: 'Reports', url: '/reports', icon: FileText },
   { title: 'Notifications', url: '/notifications', icon: Bell },
-  { title: 'Activity Logs', url: '/activity', icon: Activity },
 ];
 
 export function AppSidebar() {
