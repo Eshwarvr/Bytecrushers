@@ -20,10 +20,14 @@ export default function EmployeeDashboard() {
       const res = await api.get('/api/me');
       setCurrentUser(res.data);
       
+<<<<<<< HEAD
       // If Admin lands here, redirect to Admin control center automatically
       if (res.data.employee.role === 'Admin') {
         navigate('/org-setup');
       }
+=======
+      // Remove automatic Admin redirect so they can access Audit modules from the dashboard
+>>>>>>> origin/Phase-3
     } catch (err: any) {
       console.error('Error loading employee profile:', err);
       setError('Session expired or profile loading failed.');
@@ -115,6 +119,7 @@ export default function EmployeeDashboard() {
             </div>
           </div>
 
+<<<<<<< HEAD
           {/* QUICK LINKS FOR PHASE 2 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <button onClick={() => navigate('/assets')} className="p-4 bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/20 rounded-xl flex items-center justify-between transition-all cursor-pointer">
@@ -137,6 +142,33 @@ export default function EmployeeDashboard() {
             <p className="text-sm text-slate-400 leading-relaxed max-w-xl mx-auto">
               Welcome to the AssetFlow employee dashboard! As a <strong>{employee?.role}</strong>, you have access to read your personal assets and department directories. The administrative <strong>Organization Setup Hub</strong> is currently restricted to your profile.
             </p>
+=======
+          <div className="border-t border-white/5 pt-6 mt-6 flex flex-col items-center gap-4">
+            <p className="text-sm text-slate-400 leading-relaxed max-w-xl mx-auto text-center mb-2">
+              Welcome to the AssetFlow employee dashboard! Quick actions available for your role:
+            </p>
+            
+            <div className="flex flex-wrap gap-4 justify-center">
+              <button onClick={() => navigate('/maintenance')} className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-sm font-semibold transition-all shadow-md">
+                Maintenance Hub
+              </button>
+              
+              {employee?.role === 'Admin' && (
+                <>
+                  <button onClick={() => navigate('/audit-cycles')} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition-all shadow-md">
+                    Audit Cycles
+                  </button>
+                  <button onClick={() => navigate('/org-setup')} className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold border border-white/10 transition-all shadow-md">
+                    Org Setup
+                  </button>
+                </>
+              )}
+              
+              <button onClick={() => navigate('/auditor')} className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-all shadow-md">
+                Auditor View
+              </button>
+            </div>
+>>>>>>> origin/Phase-3
           </div>
         </div>
       </main>

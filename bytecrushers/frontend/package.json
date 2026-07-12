@@ -13,7 +13,10 @@
     "@supabase/supabase-js": "^2.110.2",
     "axios": "^1.6.2",
     "lucide-react": "^0.294.0",
+<<<<<<< HEAD
     "qrcode.react": "^4.2.0",
+=======
+>>>>>>> origin/Phase-3
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^6.20.1"
