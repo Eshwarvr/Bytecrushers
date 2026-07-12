@@ -13,6 +13,7 @@ import notificationRoutes from './routes/notification.routes';
 import maintenanceRoutes from './routes/maintenance.routes';
 import auditRoutes from './routes/audit.routes';
 import { requireAuth } from './middleware/auth.middleware';
+import { supabaseAdmin } from './lib/supabase';
 
 dotenv.config();
 
@@ -54,6 +55,24 @@ app.use('/api/activity-logs', activityRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/audit', auditRoutes);
+
+// Hackathon Signup Bypass Route
+app.post('/api/auth/hackathon-signup', async (req, res) => {
+  const { email, password, name } = req.body;
+  try {
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name }
+    });
+    if (error) throw error;
+    return res.status(200).json({ success: true, user: data.user });
+  } catch (err: any) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
 // Serve Frontend Static Files (Vite Production Build)
 const distPath = path.resolve(process.cwd(), 'frontend/dist');
 app.use(express.static(distPath));

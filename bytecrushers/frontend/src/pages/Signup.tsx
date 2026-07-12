@@ -33,19 +33,16 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      // Register with Supabase and pass name metadata. The SQL trigger public.handle_new_user() will
-      // automatically insert the employee profile with 'Employee' role.
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name: name,
-          },
-        },
+      // Use our backend hackathon bypass route to instantly verify the email
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/hackathon-signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name })
       });
 
-      if (signUpError) throw signUpError;
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Signup failed');
+      
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Failed to sign up. Please try again.');
