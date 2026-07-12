@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Bell, Info, AlertTriangle, CheckCircle, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import type { Notification } from '@/lib/types';
 
 export function NotificationPanel({ onClose }: { onClose?: () => void }) {
   const { data: notifications, isLoading } = useNotifications();
@@ -21,7 +22,7 @@ export function NotificationPanel({ onClose }: { onClose?: () => void }) {
   };
 
   const handleMarkAllRead = () => {
-    notifications?.filter(n => !n.isRead).forEach(n => markAsRead.mutate(n.id));
+    notifications?.filter((n: Notification) => !n.isRead).forEach((n: Notification) => markAsRead.mutate(n.id));
   };
 
   return (
@@ -43,7 +44,7 @@ export function NotificationPanel({ onClose }: { onClose?: () => void }) {
           </div>
         ) : (
           <div className="flex flex-col">
-            {notifications?.map((notification) => (
+            {notifications?.map((notification: Notification) => (
               <div 
                 key={notification.id}
                 className={cn(

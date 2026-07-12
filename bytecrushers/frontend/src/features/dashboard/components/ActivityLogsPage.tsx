@@ -5,11 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
-import { Search } from 'lucide-react';
+import { Search, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function ActivityLogsPage() {
   const [category, setCategory] = useState<string>('All');
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
   
   const { data: logs, isLoading } = useActivityLogs({ category });
 
@@ -20,8 +22,26 @@ export function ActivityLogsPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="min-h-screen bg-background flex flex-col relative font-inter">
+      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-sky-600/5 rounded-full blur-[120px] -z-10"></div>
+      
+      <header className="border-b border-white/5 bg-slate-950/40 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/dashboard')} className="text-slate-400 hover:text-white transition-colors cursor-pointer">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <span className="text-xl font-bold font-outfit text-white tracking-wider flex items-center gap-2">
+              <span className="px-2 py-0.5 bg-gradient-to-r from-sky-500 to-blue-600 rounded text-xs">ERP</span>
+              Activity Logs
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
+        <div className="space-y-6">
+          <div>
         <h1 className="text-3xl font-bold tracking-tight">Activity Logs</h1>
         <p className="text-muted-foreground mt-1">
           Track system events and user actions across the platform
@@ -96,6 +116,8 @@ export function ActivityLogsPage() {
           </TableBody>
         </Table>
       </div>
+        </div>
+      </main>
     </div>
   );
 }

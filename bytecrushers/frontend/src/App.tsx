@@ -11,6 +11,8 @@ import AllocationManagement from './pages/AllocationManagement';
 import MaintenanceDashboard from './pages/MaintenanceDashboard';
 import AuditCycles from './pages/AuditCycles';
 import AuditorView from './pages/AuditorView';
+import { ReportsPage } from './features/dashboard/components/ReportsPage';
+import { ActivityLogsPage } from './features/dashboard/components/ActivityLogsPage';
 import { Loader2 } from 'lucide-react';
 
 export default function App() {
@@ -60,6 +62,8 @@ export default function App() {
         <Route path="/maintenance" element={session ? <MaintenanceDashboard /> : <Navigate to="/login" replace />} />
         <Route path="/audit-cycles" element={session ? <AuditCycles /> : <Navigate to="/login" replace />} />
         <Route path="/auditor" element={session ? <AuditorView /> : <Navigate to="/login" replace />} />
+        <Route path="/reports" element={session ? <ReportsPage /> : <Navigate to="/login" replace />} />
+        <Route path="/activity-logs" element={session ? <ActivityLogsPage /> : <Navigate to="/login" replace />} />
 
         {/* Home Routing Portal */}
         <Route path="/" element={session ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchDashboardKPIs, fetchAllocations, fetchActivityLogs } from '@/lib/api';
+import type { Allocation } from '@/lib/types';
 
 export function useDashboardKPIs() {
   return useQuery({
@@ -14,7 +15,7 @@ export function useOverdueReturns() {
     queryKey: ['allocations', 'overdue'],
     queryFn: async () => {
       const all = await fetchAllocations();
-      return all.filter(a => a.status === 'Overdue' || (a.expectedReturnDate && new Date(a.expectedReturnDate) < new Date() && !a.returnedDate));
+      return all.filter((a: Allocation) => a.status === 'Overdue' || (a.expectedReturnDate && new Date(a.expectedReturnDate) < new Date() && !a.returnedDate));
     },
   });
 }

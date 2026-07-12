@@ -3,11 +3,32 @@ import { MaintenanceFrequencyChart } from './charts/MaintenanceFrequencyChart';
 import { ExportButton } from './ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function ReportsPage() {
+  const navigate = useNavigate();
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+    <div className="min-h-screen bg-background flex flex-col relative font-inter">
+      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-amber-600/5 rounded-full blur-[120px] -z-10"></div>
+      
+      <header className="border-b border-white/5 bg-slate-950/40 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/dashboard')} className="text-slate-400 hover:text-white transition-colors cursor-pointer">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <span className="text-xl font-bold font-outfit text-white tracking-wider flex items-center gap-2">
+              <span className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-600 rounded text-xs">ERP</span>
+              Reports & Analytics
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Reports & Analytics</h1>
           <p className="text-muted-foreground mt-1">
@@ -133,6 +154,8 @@ export function ReportsPage() {
           </Card>
         </div>
       </div>
+        </div>
+      </main>
     </div>
   );
 }

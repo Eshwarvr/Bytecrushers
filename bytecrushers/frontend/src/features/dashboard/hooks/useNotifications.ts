@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchNotifications, markNotificationRead } from '@/lib/api';
+import type { Notification } from '@/lib/types';
 
 export function useNotifications() {
   return useQuery({
@@ -9,8 +10,8 @@ export function useNotifications() {
 }
 
 export function useUnreadCount() {
-  const { data } = useNotifications();
-  return data?.filter(n => !n.isRead).length || 0;
+  const { data: notifications } = useNotifications();
+  return notifications?.filter((n: Notification) => !n.isRead).length || 0;
 }
 
 export function useMarkNotificationRead() {

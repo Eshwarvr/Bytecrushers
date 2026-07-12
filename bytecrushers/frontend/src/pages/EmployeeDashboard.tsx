@@ -2,13 +2,37 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import api from '../lib/api';
-import { LogOut, Building, ShieldCheck, Mail, Loader2, Award } from 'lucide-react';
+import { LogOut, Building, ShieldCheck, Loader2, Award, Box, HardDrive, Wrench, Calendar, Repeat, Activity } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+
+// Phase 4 Imports
+import { KPICard } from '../features/dashboard/components/KPICard';
+import { OverdueReturnsAlert } from '../features/dashboard/components/OverdueReturnsAlert';
+import { ReportReadyPanel } from '../features/dashboard/components/ReportReadyPanel';
+import { useDashboardKPIs, useRecentActivity } from '../features/dashboard/hooks/useDashboardData';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Skeleton } from '../components/ui/skeleton';
+
+interface UserProfile {
+  user: any;
+  employee: {
+    name: string;
+    role: string;
+    email: string;
+    department?: { name: string };
+    status: string;
+  };
+}
 
 export default function EmployeeDashboard() {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // Phase 4 Data Hooks
+  const { data: kpis, isLoading: kpiLoading } = useDashboardKPIs();
+  const { data: recentActivity, isLoading: activityLoading } = useRecentActivity();
 
   useEffect(() => {
     fetchProfile();
@@ -19,11 +43,10 @@ export default function EmployeeDashboard() {
     try {
       const res = await api.get('/api/me');
       setCurrentUser(res.data);
-      
-      // Remove automatic Admin redirect so they can access Audit modules from the dashboard
-    } catch (err: any) {
-      console.error('Error loading employee profile:', err);
-      setError('Session expired or profile loading failed.');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Session expired or profile loading failed.';
+      console.error('Error loading employee profile:', errorMessage);
+      setError(errorMessage);
       setTimeout(() => navigate('/login'), 2000);
     } finally {
       setLoading(false);
@@ -47,7 +70,7 @@ export default function EmployeeDashboard() {
   const { employee } = currentUser || {};
 
   return (
-    <div className="min-h-screen bg-background flex flex-col relative">
+    <div className="min-h-screen bg-background flex flex-col relative pb-12">
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[120px] -z-10"></div>
 
       <header className="border-b border-white/5 bg-slate-950/40 backdrop-blur-md sticky top-0 z-40">
@@ -67,17 +90,17 @@ export default function EmployeeDashboard() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-12 font-inter flex flex-col items-center justify-center">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8 font-inter flex flex-col gap-8">
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center">
+          <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center">
             {error}
           </div>
         )}
 
-        <div className="w-full glass-card rounded-3xl p-8 relative overflow-hidden">
+        {/* --- Employee Profile Header (Original Phase 2/3) --- */}
+        <div className="w-full glass-card rounded-3xl p-8 relative overflow-hidden flex flex-col md:flex-row items-center gap-8">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
-
-          <div className="flex flex-col items-center text-center mb-8">
+          <div className="flex flex-col items-center text-center md:items-start md:text-left shrink-0">
             <div className="w-20 h-20 bg-purple-500/10 rounded-2xl border border-purple-500/20 text-purple-400 flex items-center justify-center mb-4 text-3xl font-bold font-outfit uppercase">
               {employee?.name ? employee.name[0] : 'U'}
             </div>
@@ -87,73 +110,107 @@ export default function EmployeeDashboard() {
               Role Rank: {employee?.role}
             </span>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center text-center">
-              <Mail className="w-6 h-6 text-purple-400 mb-2" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col text-center">
               <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Email Address</span>
-              <span className="text-sm font-semibold text-white font-mono">{employee?.email}</span>
+              <span className="text-sm font-semibold text-white font-mono truncate">{employee?.email}</span>
             </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center text-center">
-              <Building className="w-6 h-6 text-indigo-400 mb-2" />
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col text-center">
               <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Department</span>
-              <span className="text-sm font-semibold text-white">
-                {employee?.department?.name || 'No Department Assigned'}
-              </span>
+              <span className="text-sm font-semibold text-white">{employee?.department?.name || 'Unassigned'}</span>
             </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center text-center">
-              <ShieldCheck className="w-6 h-6 text-emerald-400 mb-2" />
-              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Employment Status</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
-                {employee?.status}
-              </span>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col text-center">
+              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1">Status</span>
+              <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">{employee?.status}</span>
             </div>
           </div>
+        </div>
 
-          {/* QUICK LINKS FOR PHASE 2 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <button onClick={() => navigate('/assets')} className="p-4 bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/20 rounded-xl flex items-center justify-between transition-all cursor-pointer">
-              <div className="flex flex-col text-left">
-                <span className="text-white font-bold font-outfit">Asset Registry</span>
-                <span className="text-xs text-purple-400">View and manage company assets</span>
-              </div>
-              <Building className="w-5 h-5 text-purple-400" />
-            </button>
-            <button onClick={() => navigate('/workflows')} className="p-4 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 rounded-xl flex items-center justify-between transition-all cursor-pointer">
-              <div className="flex flex-col text-left">
-                <span className="text-white font-bold font-outfit">Resource Engine</span>
-                <span className="text-xs text-indigo-400">Allocations, Bookings & Transfers</span>
-              </div>
-              <ShieldCheck className="w-5 h-5 text-indigo-400" />
-            </button>
-          </div>
+        {/* --- Phase 4 Overdue Alert --- */}
+        <OverdueReturnsAlert />
 
-          <div className="border-t border-white/5 pt-6 mt-6 flex flex-col items-center gap-4">
-            <p className="text-sm text-slate-400 leading-relaxed max-w-xl mx-auto text-center mb-2">
-              Welcome to the AssetFlow employee dashboard! Quick actions available for your role:
-            </p>
+        {/* --- Phase 4 Analytics KPI Cards --- */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <KPICard title="Available Assets" value={kpis?.available} icon={<Box className="h-4 w-4" />} isLoading={kpiLoading} />
+          <KPICard title="Allocated" value={kpis?.allocated} icon={<HardDrive className="h-4 w-4" />} isLoading={kpiLoading} />
+          <KPICard title="In Maintenance" value={kpis?.inMaintenance} icon={<Wrench className="h-4 w-4 text-destructive" />} isLoading={kpiLoading} />
+          <KPICard title="Active Bookings" value={kpis?.activeBookings} icon={<Calendar className="h-4 w-4" />} isLoading={kpiLoading} />
+          <KPICard title="Pending Transfers" value={kpis?.pendingTransfers} icon={<Repeat className="h-4 w-4" />} isLoading={kpiLoading} />
+          <KPICard title="Upcoming Returns" value={kpis?.upcomingReturns} icon={<Activity className="h-4 w-4" />} isLoading={kpiLoading} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* --- Phase 4 Recent Activity Panel --- */}
+          <Card className="col-span-2 border-white/10 bg-white/5">
+            <CardHeader>
+              <CardTitle className="text-white">Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {activityLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full bg-white/5" />)}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentActivity?.map(log => (
+                    <div key={log.id} className="flex items-start gap-4 border-b border-border/10 pb-4 last:border-0 last:pb-0">
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium leading-none text-white">
+                          {log.actor} <span className="font-normal text-slate-400">{log.action}</span> {log.entityName}
+                        </p>
+                        <p className="text-sm text-slate-400">
+                          {log.details}
+                        </p>
+                      </div>
+                      <div className="text-xs text-slate-500 whitespace-nowrap">
+                        {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
+                      </div>
+                    </div>
+                  ))}
+                  {recentActivity?.length === 0 && (
+                    <p className="text-sm text-slate-400 text-center py-4">No recent activity found.</p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* --- Integrated Actions & Reports --- */}
+          <div className="col-span-1 flex flex-col gap-6">
+            <ReportReadyPanel />
             
-            <div className="flex flex-wrap gap-4 justify-center">
-              <button onClick={() => navigate('/maintenance')} className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-sm font-semibold transition-all shadow-md">
-                Maintenance Hub
+            {/* Quick Links / Role-Based Actions (Original Phase 2/3) */}
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col gap-3">
+              <h3 className="text-lg font-bold font-outfit text-white mb-2">Actions</h3>
+              
+              <button onClick={() => navigate('/assets')} className="w-full p-3 bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/20 rounded-xl flex items-center gap-3 transition-all">
+                <Building className="w-4 h-4 text-purple-400" />
+                <span className="text-white text-sm font-semibold">Asset Registry</span>
               </button>
               
+              <button onClick={() => navigate('/workflows')} className="w-full p-3 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 rounded-xl flex items-center gap-3 transition-all">
+                <ShieldCheck className="w-4 h-4 text-indigo-400" />
+                <span className="text-white text-sm font-semibold">Resource Engine</span>
+              </button>
+
+              <button onClick={() => navigate('/maintenance')} className="w-full p-3 bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 rounded-xl flex items-center gap-3 transition-all">
+                <Wrench className="w-4 h-4 text-rose-400" />
+                <span className="text-white text-sm font-semibold">Maintenance Hub</span>
+              </button>
+
               {employee?.role === 'Admin' && (
                 <>
-                  <button onClick={() => navigate('/audit-cycles')} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition-all shadow-md">
-                    Audit Cycles
+                  <button onClick={() => navigate('/audit-cycles')} className="w-full p-3 bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/20 rounded-xl flex items-center gap-3 transition-all">
+                    <Award className="w-4 h-4 text-emerald-400" />
+                    <span className="text-white text-sm font-semibold">Audit Cycles</span>
                   </button>
-                  <button onClick={() => navigate('/org-setup')} className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold border border-white/10 transition-all shadow-md">
-                    Org Setup
+                  <button onClick={() => navigate('/org-setup')} className="w-full p-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold border border-white/10 transition-all">
+                    <span className="w-4 h-4" /> 
+                    <span className="text-white text-sm font-semibold">Organization Setup</span>
                   </button>
                 </>
               )}
-              
-              <button onClick={() => navigate('/auditor')} className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-all shadow-md">
-                Auditor View
-              </button>
             </div>
           </div>
         </div>

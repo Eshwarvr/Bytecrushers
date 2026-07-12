@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchAssets } from '@/lib/api';
+import type { Asset } from '@/lib/types';
 
 export function useUtilizationData() {
   return useQuery({
@@ -9,7 +10,7 @@ export function useUtilizationData() {
       
       const departments: Record<string, { name: string; available: number; allocated: number; maintenance: number }> = {};
       
-      assets.forEach(asset => {
+      assets.forEach((asset: Asset) => {
         const depId = asset.departmentId;
         if (!departments[depId]) {
           departments[depId] = { name: depId, available: 0, allocated: 0, maintenance: 0 };
